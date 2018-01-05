@@ -12,6 +12,12 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.elasticsearch.spark.rdd.EsSpark
 import org.elasticsearch.spark._
 
+/**
+  * 解析日志格式
+  * {"message":"1514350489.468      1 222.218.57.196 TCP_MEM_HIT/200 352 GET http://laest.kh92.cn/new_old/new_sf.zip.crc?id=967  - NONE/- application/x-msdownload \"-\" \"-\" \"-\"","@version":"1","@timestamp":"2017-12-27T04:54:50.966Z","type":"fc_access","file":"/data/proclog/log/squid/access.log","host":"CHN-WX-b-3H9","offset":"2598752"}
+  *
+  * 101.251.98.137:2181,101.251.98.138:2181,101.251.98.139:2181,101.251.98.140:2181,101.251.98.141:2181
+  */
 object RequestCountTe {
 
   def main(args: Array[String]): Unit = {
@@ -19,10 +25,11 @@ object RequestCountTe {
 
 
 
-    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181","g1","test","2")
-    val sparkConf = new SparkConf().setAppName("KafkaWordCount").setMaster("local[2]")
+//    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181","g1","test","2")
+    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181,101.251.98.138:2181,101.251.98.139:2181,101.251.98.140:2181,101.251.98.141:2181","g1","test","2")
+    val sparkConf = new SparkConf().setAppName("KafkaWordCount")//.setMaster("local[2]")
     sparkConf.set("es.index.auto.create", "true")
-    sparkConf.set("es.nodes", "101.251.98.137")
+    sparkConf.set("es.nodes", "101.251.98.137,101.251.98.138,101.251.98.139,101.251.98.140,101.251.98.141")
     sparkConf.set("es.port", "9200")
 
     val ssc = new StreamingContext(sparkConf, Seconds(5))
@@ -30,30 +37,9 @@ object RequestCountTe {
     val data = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap, StorageLevel.MEMORY_AND_DISK_SER)
 
     val data_mes = data.map( kafka_log_tup => {
-      val jsonParser = new JSONParser()
-      val kafka_log = kafka_log_tup._2
-      val jsonObj: JSONObject = jsonParser.parse(kafka_log).asInstanceOf[JSONObject]
-      val message = jsonObj.getAsString("message")
-//      message
-      val messageArray = message.split(" ").filter(!"   ".contains(_))
-      println(messageArray.toBuffer)
-      val timestamp = messageArray(0)
-
-      val timestampS:java.lang.String = "1514350489.468".replace(".","")
-      val dateFormat = new SimpleDateFormat("yyyyMMddHHmm")
-//      DateTimeFormat.forPattern("").parseMillis(timestamp)
-
-      val timestampStr = dateFormat.format(new java.util.Date(new java.lang.Long(timestampS)))
-      println(timestampStr)
-
-      val requestUrl = messageArray(6)
-      val requestUrlArray = requestUrl.split("/").filter(!"   ".contains(_))
-      println(requestUrlArray.toBuffer)
-      val uriHost = requestUrlArray(1)
-      val reqSize = messageArray(4).toDouble
-
-      ((uriHost,timestampStr),reqSize)
-    }).reduceByKey(_+_).mapValues(_/60)
+      println("进行解析")
+        ParseLog.parseLogForBwCatch(kafka_log_tup)
+    }).filter( value => {value._2 != 0} ).reduceByKey(_+_).mapValues(_/60)
 
 //    data_mes.print()  (uri_time_tup,bandwidth)
     data_mes.foreachRDD( rdd => {
