@@ -10,7 +10,7 @@ import parlog.TotalIPCount
   * 首先根据域名来计算  logstashIndexDF_ip_totalcount
   *
   *
-  *
+  * 
   es数据
 {
 "_index": "spark-portal-20171121",
