@@ -15,6 +15,7 @@ object TotalIPCount {
     }catch {
       case  ex: Exception => {
         println("error"+kafka_log_tup._2)
+        nomal_result =  ((kafka_log_tup._2, "197001010101"), 0)  //这一句后加的记录错误日志吧
       }
     }
     nomal_result

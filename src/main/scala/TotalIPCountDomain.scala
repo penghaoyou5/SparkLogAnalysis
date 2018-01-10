@@ -31,7 +31,7 @@ object TotalIPCountDomain {
   def main(args: Array[String]): Unit = {
     LoggerLevels.setStreamingLogLevels()
     val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181,101.251.98.138:2181,101.251.98.139:2181,101.251.98.140:2181,101.251.98.141:2181","g1","test","5")
-    val sparkConf = new SparkConf().setAppName("ip_totalcount").setMaster("local[2]")
+    val sparkConf = new SparkConf().setAppName("ip_totalcount")//.setMaster("local[2]")
     sparkConf.set("es.index.auto.create", "true")
     sparkConf.set("es.nodes", "101.251.98.137,101.251.98.138,101.251.98.139,101.251.98.140,101.251.98.141")
     sparkConf.set("es.port", "9200")
