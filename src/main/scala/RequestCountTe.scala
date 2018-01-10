@@ -32,7 +32,7 @@ object RequestCountTe {
     sparkConf.set("es.nodes", "101.251.98.137,101.251.98.138,101.251.98.139,101.251.98.140,101.251.98.141")
     sparkConf.set("es.port", "9200")
 
-    val ssc = new StreamingContext(sparkConf, Seconds(5))
+    val ssc = new StreamingContext(sparkConf, Seconds(60)) //这个时间设置多长合适？
     val topicMap = topics.split(",").map((_, numThreads.toInt)).toMap
     val data = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap, StorageLevel.MEMORY_AND_DISK_SER)
 
