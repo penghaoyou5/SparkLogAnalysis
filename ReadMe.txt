@@ -8,3 +8,7 @@ nohup $SPARK_HOME/bin/spark-submit --class RequestCountTe  --master spark://sp26
 
 第二个进行域名的请求数计算   存入es的格式安装现在的线上环境
 nohup $SPARK_HOME/bin/spark-submit --class TotalIPCountUserMySQl  --master spark://sp26:7077 --executor-memory 20G --total-executor-cores 10 /home/ubuntu/sparkJar/LogBIgData-1.0-SNAPSHOT.jar &
+
+
+第二个进行域名的请求数计算   存入es的格式安装现在的线上环境  增加异常捕获 请求日志计算成功
+nohup $SPARK_HOME/bin/spark-submit --class TotalIPCountDomain  --master spark://sp26:7077 --executor-memory 20G --total-executor-cores 10 /home/ubuntu/sparkJar/LogBIgData-1.0-SNAPSHOT.jar &
