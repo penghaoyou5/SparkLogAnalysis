@@ -26,7 +26,7 @@ object WeblukerSqlQueryDict {
   println("end")
 
   while (rs.next) {
-          println(rs.getString("dstdomainName") + "   " + rs.getInt("userId"))
+//          println(rs.getString("dstdomainName") + "   " + rs.getInt("userId"))
     //      domainUserDict += (rs.getString("dstdomainName") -> rs.getInt("userId"))
     domainUserDict(rs.getString("dstdomainName")) = rs.getInt("userId")
   }

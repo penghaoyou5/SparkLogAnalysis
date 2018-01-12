@@ -17,3 +17,15 @@ nohup $SPARK_HOME/bin/spark-submit --class TotalIPCountDomain  --master spark://
 第三个 TotalIPCountUserMySQl
 这个类是查询数据库 请求数可以用户查询成功 线上测试
 nohup $SPARK_HOME/bin/spark-submit --class TotalIPCountUserMySQl  --master spark://sp26:7077 --executor-memory 20G --total-executor-cores 10 /home/ubuntu/sparkJar/LogBIgData-1.0-SNAPSHOT.jar &
+
+
+第四个进行离线计算   OfflineTotalIpDountDomain
+从hadoop取出原始日志 然后进行计算存到es中
+$SPARK_HOME/bin/spark-submit --class offline.OfflineTotalIpDountDomain  --master spark://sp26:7077 --executor-memory 20G --total-executor-cores 10 /home/ubuntu/sparkJar/LogBIgData-1.0-SNAPSHOT.jar 20171204
+
+
+
+第四个进行离线计算   OfflineTotalIpDountUserMySQl
+从hadoop取出原始日志 然后进行计算存到es中  这里进行了数据库查询 存的是userId
+
+$SPARK_HOME/bin/spark-submit --class offline.OfflineTotalIpDountUserMySQl  --master spark://sp26:7077 --executor-memory 20G --total-executor-cores 10 /home/ubuntu/sparkJar/LogBIgData-1.0-SNAPSHOT.jar 20171204
