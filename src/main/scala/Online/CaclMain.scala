@@ -121,6 +121,15 @@ object CaclMain {
     useMimeRdd.map(item => Map(("userId",item._1._1),("mime",item._1._2),("fileCountSum",item._2._1),("totalFileSizeSum",item._2._2),("media_index",item._1._3.substring(0,8)),("add_time",item._1._3))).foreachRDD(_.saveToEs("spark-portal-{media_index}/logstashIndexDF_filetype_totalsize_sum"))
 
 
+
+    //==========  顺便进行pageView统计
+
+    //pv按域名统计 保存
+    domainMimeRdd.filter(_._1._3 == "text/html").map(item => Map(("uriHost",item._1._1), ( "fileCount",item._2._1),("media_index",item._1._4.substring(0,8)),("add_time",item._1._4))).foreachRDD(_.saveToEs("spark-portal-{media_index}/logstashIndexDF_pv_count"))
+
+    //pv按用户统计 保存
+    useMimeRdd.filter(_._1._3 == "text/html").map(item => Map(("userId",item._1._1),("pvCountSum",item._2._1),("media_index",item._1._3.substring(0,8)),("add_time",item._1._3) )).foreachRDD(_.saveToEs("spark-portal-{media_index}/logstashIndexDF_pv_count_sum"))
+
   }
 
 
