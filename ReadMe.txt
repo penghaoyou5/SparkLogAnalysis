@@ -29,3 +29,20 @@ $SPARK_HOME/bin/spark-submit --class offline.OfflineTotalIpDountDomain  --master
 从hadoop取出原始日志 然后进行计算存到es中  这里进行了数据库查询 存的是userId
 
 $SPARK_HOME/bin/spark-submit --class offline.OfflineTotalIpDountUserMySQl  --master spark://sp26:7077 --executor-memory 20G --total-executor-cores 10 /home/ubuntu/sparkJar/LogBIgData-1.0-SNAPSHOT.jar 20171204
+
+
+//=================
+实时统计完成 主类是 Online.CaclMain
+现在实现的实时统计共包括
+
+总请求数统计
+文件类型统计   PV访问统计
+访问分布统计：地区分布和运行商分布
+访问终端统计： 浏览器分布  操作系统分布
+
+未实现流量带宽统计，实现很简单，因为现在没有界面展示验证  其实可以存到数据库中
+
+
+
+
+
