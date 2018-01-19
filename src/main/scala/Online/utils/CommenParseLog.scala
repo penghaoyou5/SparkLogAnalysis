@@ -85,8 +85,14 @@ object CommenParseLog {
 
     val userId = WeblukerSqlQueryDict.domainUserDict.getOrElse(uriHost,"")
 
-//    (timestampStr,clientIp,repSize,uriHost,mime)
-    Map(("uriHost",uriHost),("timestampStr",timestampStr),("clientIp",clientIp),("repSize",repSize),("mime",mime),("agentCheck",agentCheck),("userId",userId))
+    val browserOsTup = ClientInfoUtil.getBrowserOs(agentCheck)
+
+    val wlkAddress = IPSeekerUtil.getWlkAddressByIp(clientIp);
+
+    val (countryCN,countryPY,areaCN,areaPY) = (wlkAddress(0),wlkAddress(1),wlkAddress(2),wlkAddress(3))
+
+    //    (timestampStr,clientIp,repSize,uriHost,mime)
+    Map(("uriHost",uriHost),("timestampStr",timestampStr),("clientIp",clientIp),("repSize",repSize),("mime",mime),("os_name",browserOsTup._2),("browser_name",browserOsTup._1),("userId",userId),("countryCN",countryCN),("areaCN",areaCN)) //,("countryPY",countryPY),("areaPY",areaPY)
   }
 
 }

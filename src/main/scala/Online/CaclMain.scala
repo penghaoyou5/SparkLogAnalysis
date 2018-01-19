@@ -40,6 +40,9 @@ object CaclMain {
     //进行统计的几个方法
     caclRequest(originMapRdd)
     caclMimeType(originMapRdd)
+    caclBrowser(originMapRdd)
+    caclOs(originMapRdd)
+    caclAreaStat(originMapRdd)
 
 
     ssc.start()
@@ -133,5 +136,66 @@ object CaclMain {
   }
 
 
+  /**
+    * 进行浏览器统计
+    * @param originMapRdd
+    */
+  def caclBrowser(originMapRdd:DStream[(Map[String,String])]): Unit ={
+    //=======进行浏览器统计
+    //域名统计
+    val domainBrowserRdd = originMapRdd.map(item => ((item.getOrElse("uriHost",""),item.getOrElse("userId",""),item.getOrElse("browser_name",""),item.getOrElse("timestampStr","")),1)).reduceByKey(_+_)
 
+    //统计按域名保存
+    domainBrowserRdd.map(item => Map(("uriHost",item._1._1),("name",item._1._3),("browserCount",item._2),("media_index",item._1._4.substring(0,8)),("add_time",item._1._4))).foreachRDD(_.saveToEs("spark-portal-{media_index}/logstashIndexDF_browser_count"))
+
+
+    //在域名基础上用户统计  保存
+    val useBrowserRdd = domainBrowserRdd.map(item => ((item._1._2,item._1._3,item._1._4),item._2)).reduceByKey(_+_)
+
+    useBrowserRdd.map(item =>  Map(("userId",item._1._1),("name",item._1._2),("browserCountSum",item._2),("media_index",item._1._3.substring(0,8)),("add_time",item._1._3))).foreachRDD(_.saveToEs("spark-portal-{media_index}/logstashIndexDF_browser_count_sum"))
+
+
+  }
+
+
+
+  /**
+    * 进行系统统计  代码和上面浏览器代码差不多 ，这种代码应该出入固定的参数就行了吧
+    * @param originMapRdd
+    */
+  def caclOs(originMapRdd:DStream[(Map[String,String])]): Unit ={
+    //=======进行浏览器统计
+    //域名统计
+    val domainOsRdd = originMapRdd.map(item => ((item.getOrElse("uriHost",""),item.getOrElse("userId",""),item.getOrElse("os_name",""),item.getOrElse("timestampStr","")),1)).reduceByKey(_+_)
+
+    //统计按域名保存
+    domainOsRdd.map(item => Map(("uriHost",item._1._1),("userId",item._1._2),("os_name",item._1._3),("osCount",item._2),("media_index",item._1._4.substring(0,8)),("add_time",item._1._4))).foreachRDD(_.saveToEs("spark-portal-{media_index}/logstashIndexDF_os_count"))
+
+
+//    //在域名基础上用户统计  保存
+//    val useOsRdd = domainOsRdd.map(item => ((item._1._2,item._1._3,item._1._4),item._2)).reduceByKey(_+_)
+//
+//    useOsRdd.map(item =>  Map(("userId",item._1._1),("name",item._1._2),("browserCountSum",item._2),("media_index",item._1._3.substring(0,8)),("add_time",item._1._3))).foreachRDD(_.saveToEs("spark-portal-{media_index}/logstashIndexDF_browser_count_sum"))
+
+  }
+
+
+  /**
+    * 进行区域统计
+    * @param originMapRdd
+    */
+  def caclAreaStat(originMapRdd:DStream[(Map[String,String])]): Unit ={
+    //域名统计
+    val domainAreaStatRdd = originMapRdd.map(item => ((item.getOrElse("uriHost",""),item.getOrElse("userId",""),item.getOrElse("countryCN",""),item.getOrElse("areaCN",""),item.getOrElse("timestampStr","")),1)).reduceByKey(_+_)
+
+    //统计按域名保存
+    domainAreaStatRdd.map(item => Map(("uriHost",item._1._1),("countryCN",item._1._3),("areaCN",item._1._4),("mimeIPCount",item._2),("media_index",item._1._5.substring(0,8)),("add_time",item._1._5))).foreachRDD(_.saveToEs("spark-portal-area-{media_index}/logstashIndexDF_area_count"))
+
+
+    //在域名基础上用户统计  保存
+    val useBrowserRdd = domainAreaStatRdd.map(item => ((item._1._2,item._1._3,item._1._4,item._1._5),item._2)).reduceByKey(_+_)
+
+    useBrowserRdd.map(item =>  Map(("userId",item._1._1),("countryCN",item._1._2),("areaCN",item._1._3),("mimeIPCountSum",item._2),("media_index",item._1._4.substring(0,8)),("add_time",item._1._4))).foreachRDD(_.saveToEs("spark-portal-area-{media_index}/logstashIndexDF_area_count_sum"))
+
+  }
 }
