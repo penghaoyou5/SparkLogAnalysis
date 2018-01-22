@@ -598,25 +598,22 @@ public class IPSeekerUtil {
         }
         if(ipSeeker == null){
             //这个地址一定要写对
-            String file =  (IPSeekerUtil.class.getResource("/").toString() + "qqwry.dat");
-            file = "qqwry.dat";
+//            String file =  (IPSeekerUtil.class.getResource("/").toString() + "qqwry.dat");
+            String file = "qqwry.dat";
 //            file = file.substring(file.indexOf("/"));
             //上一种方式集群运行失败所以改方式
 //            String file = "./src/main/scala/qqwry.dat";
             try {
                 ipSeeker = new IPSeekerUtil(new File(file));
-                String[] arr2Provine = chinaToEnglish(PROVINCE_EN,ipSeeker.getCountry(ip));
-                String[] arr2IspEn = chinaToEnglish(ISP_EN,ipSeeker.getArea(ip));
-                arrResult = ArrayUtils.addAll(arr2Provine,arr2IspEn);
-
             } catch (Exception e) {
-
-                arrResult = new String[]{"未知", "UNKNOW", "未知", "UNKNOW"};
                 System.out.print("IP地址库实例化出错");
             }
         }
-//        System.out.print(ipSeeker.getCountry(ip));
-//        System.out.print(ipSeeker.getArea(ip));
+
+        String[] arr2Provine = chinaToEnglish(PROVINCE_EN,ipSeeker.getCountry(ip));
+        String[] arr2IspEn = chinaToEnglish(ISP_EN,ipSeeker.getArea(ip));
+        arrResult = ArrayUtils.addAll(arr2Provine,arr2IspEn);
+
 
         IP_WLK_ADDRESS.put(ip,arrResult);
         return arrResult;
@@ -624,7 +621,7 @@ public class IPSeekerUtil {
     }
 
     public static void main(String[] args){
-        String[] result =  getWlkAddressByIp("223.202.202.8");
+        String[] result =  getWlkAddressByIp("220.184.236.20");
         System.out.print(result[0]);
         System.out.print(result[1]);
         System.out.print(result[2]);
