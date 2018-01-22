@@ -16,15 +16,15 @@ object CommenParseLog {
   def main(args: Array[String]): Unit = {
     var kafka_log = "{\"source\":\"/data/cache1/filbeat_conf/logsdir/CHN-JI-3-3gD.dhdown.5211game.com-03.log\",\"type\":\"log\",\"@version\":\"1\",\"@timestamp\":\"2018-01-12T07:38:12.228Z\",\"offset\":81317701,\"prospector\":{\"type\":\"log\"},\"host\":\"BGP-SM-4-3gf\",\"message\":\"1512270367.090  92542 116.29.4.214 TCP_HIT/200 153420062 GET http://dhdown.5211game.com/download/360/dl/zjhl_setup360wan_all_1.0.3.19_ef.exe  - NONE/- application/octet-stream \\\"http://dhol.wan.360.cn/sindex.html\\\" \\\"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36\\\" \\\"-\\\"\",\"tags\":[\"beats_input_codec_plain_applied\"],\"beat\":{\"name\":\"BGP-SM-4-3gf\",\"version\":\"6.1.1\",\"hostname\":\"BGP-SM-4-3gf\"}}"
 
-    kafka_log = "{\"message\":\"1516597252.198      8 117.136.56.139 TCP_IMS_HIT/304 218 GET http://cdn.kkapp.com/project/kkmessage/json/c_28_1510539734079.json  - NONE/- application/json \\\"-\\\" \\\"Dalvik/1.6.0 (Linux; U; Android 4.4.4; Konka Android TV 638 Build/KTU84P)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T05:00:56.403Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CMN-HB-1-3gH\",\"offset\":\"468182\"}"
+//    kafka_log = "{\"message\":\"1516597252.198      8 117.136.56.139 TCP_IMS_HIT/304 218 GET http://cdn.kkapp.com/project/kkmessage/json/c_28_1510539734079.json  - NONE/- application/json \\\"-\\\" \\\"Dalvik/1.6.0 (Linux; U; Android 4.4.4; Konka Android TV 638 Build/KTU84P)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T05:00:56.403Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CMN-HB-1-3gH\",\"offset\":\"468182\"}"
 
-    kafka_log = "{\"message\":\"1516603541.055     23 211.138.88.78 TCP_HIT/200 11255 GET http://m.88yangsheng.com/css/boilerplate.css  - NONE/- text/css \\\"http://m.88yangsheng.com/xieemanhua/\\\" \\\"Mozilla/5.0 (iPhone; CPU iPhone OS 11_2_2 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) BaiduBoxApp/10.2.5 iPhone; CPU iPhone OS 11_2_2 like Mac OS X Mobile/15C202 Safari/602.1 baiduboxapp/10.2.5.11 (Baidu; P2 11.2.2)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T06:45:42.855Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CNC-LQ-c-3HA\",\"offset\":\"25149271\"}"
+//    kafka_log = "{\"message\":\"1516603541.055     23 211.138.88.78 TCP_HIT/200 11255 GET http://m.88yangsheng.com/css/boilerplate.css  - NONE/- text/css \\\"http://m.88yangsheng.com/xieemanhua/\\\" \\\"Mozilla/5.0 (iPhone; CPU iPhone OS 11_2_2 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) BaiduBoxApp/10.2.5 iPhone; CPU iPhone OS 11_2_2 like Mac OS X Mobile/15C202 Safari/602.1 baiduboxapp/10.2.5.11 (Baidu; P2 11.2.2)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T06:45:42.855Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CNC-LQ-c-3HA\",\"offset\":\"25149271\"}"
 
-    val resultMap =  parseLogToTupNormal(kafka_log)
+    val resultMap =  parseLogToTup(kafka_log)
     println(resultMap)
 
-    var resultMapTes:Map[String,String] =  Map[String,String]()
-    println(resultMapTes.nonEmpty)
+//    var resultMapTes:Map[String,String] =  Map[String,String]()
+//    println(resultMapTes.nonEmpty)
 
   }
 
@@ -63,7 +63,7 @@ object CommenParseLog {
     *
     * */
   def parseLogToTupNormal (kafka_log: String):Map[String,String]=   {
-    val jsonObj: JSONObject = jsonParser.parse(kafka_log).asInstanceOf[JSONObject]
+//    val jsonObj: JSONObject = jsonParser.parse(kafka_log).asInstanceOf[JSONObject]
 
     /**
       * message原始日志
@@ -71,8 +71,13 @@ object CommenParseLog {
       * 按照空格分割代表
       * timestamp   reqtime  clientIP  squidCache  repsize  reqMethod  requestURL  username requestOriginSite mime referer agentCheck
       */
-    val message = jsonObj.getAsString("message")
+//    val message = jsonObj.getAsString("message")
+//    val messageArray = message.split(" ").filterNot(_.isEmpty)
+
+    //由于线上spark进行json解析的时候有异常但是又不知道是什么异常 所以完全先进行字符串切割完成
+    val message = kafka_log.split("\"message\":\"")(1)
     val messageArray = message.split(" ").filterNot(_.isEmpty)
+
 
     //时间戳转换  1512270367.090   ->  201712031106
     val timestampStr = dateFormat.format(new java.util.Date(new java.lang.Long(messageArray(0).replace(".", ""))))
