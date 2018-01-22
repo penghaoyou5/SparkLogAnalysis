@@ -599,7 +599,10 @@ public class IPSeekerUtil {
         if(ipSeeker == null){
             //这个地址一定要写对
             String file =  (IPSeekerUtil.class.getResource("/").toString() + "qqwry.dat");
-            file = file.substring(file.indexOf("/"));
+            file = "qqwry.dat";
+//            file = file.substring(file.indexOf("/"));
+            //上一种方式集群运行失败所以改方式
+//            String file = "./src/main/scala/qqwry.dat";
             try {
                 ipSeeker = new IPSeekerUtil(new File(file));
                 String[] arr2Provine = chinaToEnglish(PROVINCE_EN,ipSeeker.getCountry(ip));
