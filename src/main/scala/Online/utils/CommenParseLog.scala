@@ -18,6 +18,7 @@ object CommenParseLog {
 
     kafka_log = "{\"message\":\"1516597252.198      8 117.136.56.139 TCP_IMS_HIT/304 218 GET http://cdn.kkapp.com/project/kkmessage/json/c_28_1510539734079.json  - NONE/- application/json \\\"-\\\" \\\"Dalvik/1.6.0 (Linux; U; Android 4.4.4; Konka Android TV 638 Build/KTU84P)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T05:00:56.403Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CMN-HB-1-3gH\",\"offset\":\"468182\"}"
 
+    kafka_log = "{\"message\":\"1516603541.055     23 211.138.88.78 TCP_HIT/200 11255 GET http://m.88yangsheng.com/css/boilerplate.css  - NONE/- text/css \\\"http://m.88yangsheng.com/xieemanhua/\\\" \\\"Mozilla/5.0 (iPhone; CPU iPhone OS 11_2_2 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) BaiduBoxApp/10.2.5 iPhone; CPU iPhone OS 11_2_2 like Mac OS X Mobile/15C202 Safari/602.1 baiduboxapp/10.2.5.11 (Baidu; P2 11.2.2)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T06:45:42.855Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CNC-LQ-c-3HA\",\"offset\":\"25149271\"}"
 
     val resultMap =  parseLogToTupNormal(kafka_log)
     println(resultMap)
@@ -46,6 +47,9 @@ object CommenParseLog {
     }catch {
       case  ex: Exception => {
 //        resultMap = Map(("uriHost",""),("timestampStr","197001010000"))
+        println("error parser  CommenParseLog 49")
+        println(ex)
+        println(kafka_log)
       }
     }
     resultMap
@@ -73,9 +77,16 @@ object CommenParseLog {
     //时间戳转换  1512270367.090   ->  201712031106
     val timestampStr = dateFormat.format(new java.util.Date(new java.lang.Long(messageArray(0).replace(".", ""))))
 
+    //这里是由于很多时间解析异常不合理 所以在此打印
+    if (!timestampStr.contains("201801")){
+      throw new ArithmeticException("You are not eligible")
+    }
+
     val clientIp = messageArray(2)
 
     val repSize = messageArray(4)
+    //由于有解析异常 所以这里开始解析  解析成功就ok  解析失败报异常
+    Integer.parseInt(repSize)
 
     val requestUrl = messageArray(6)
     val requestUrlArray = requestUrl.split("/").filterNot(_.isEmpty)
