@@ -14,7 +14,10 @@ object CommenParseLog {
   val jsonParser = new JSONParser()
 
   def main(args: Array[String]): Unit = {
-    val kafka_log = "{\"source\":\"/data/cache1/filbeat_conf/logsdir/CHN-JI-3-3gD.dhdown.5211game.com-03.log\",\"type\":\"log\",\"@version\":\"1\",\"@timestamp\":\"2018-01-12T07:38:12.228Z\",\"offset\":81317701,\"prospector\":{\"type\":\"log\"},\"host\":\"BGP-SM-4-3gf\",\"message\":\"1512270367.090  92542 116.29.4.214 TCP_HIT/200 153420062 GET http://dhdown.5211game.com/download/360/dl/zjhl_setup360wan_all_1.0.3.19_ef.exe  - NONE/- application/octet-stream \\\"http://dhol.wan.360.cn/sindex.html\\\" \\\"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36\\\" \\\"-\\\"\",\"tags\":[\"beats_input_codec_plain_applied\"],\"beat\":{\"name\":\"BGP-SM-4-3gf\",\"version\":\"6.1.1\",\"hostname\":\"BGP-SM-4-3gf\"}}"
+    var kafka_log = "{\"source\":\"/data/cache1/filbeat_conf/logsdir/CHN-JI-3-3gD.dhdown.5211game.com-03.log\",\"type\":\"log\",\"@version\":\"1\",\"@timestamp\":\"2018-01-12T07:38:12.228Z\",\"offset\":81317701,\"prospector\":{\"type\":\"log\"},\"host\":\"BGP-SM-4-3gf\",\"message\":\"1512270367.090  92542 116.29.4.214 TCP_HIT/200 153420062 GET http://dhdown.5211game.com/download/360/dl/zjhl_setup360wan_all_1.0.3.19_ef.exe  - NONE/- application/octet-stream \\\"http://dhol.wan.360.cn/sindex.html\\\" \\\"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36\\\" \\\"-\\\"\",\"tags\":[\"beats_input_codec_plain_applied\"],\"beat\":{\"name\":\"BGP-SM-4-3gf\",\"version\":\"6.1.1\",\"hostname\":\"BGP-SM-4-3gf\"}}"
+
+    kafka_log = "{\"message\":\"1516597252.198      8 117.136.56.139 TCP_IMS_HIT/304 218 GET http://cdn.kkapp.com/project/kkmessage/json/c_28_1510539734079.json  - NONE/- application/json \\\"-\\\" \\\"Dalvik/1.6.0 (Linux; U; Android 4.4.4; Konka Android TV 638 Build/KTU84P)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T05:00:56.403Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CMN-HB-1-3gH\",\"offset\":\"468182\"}"
+
 
     val resultMap =  parseLogToTupNormal(kafka_log)
     println(resultMap)

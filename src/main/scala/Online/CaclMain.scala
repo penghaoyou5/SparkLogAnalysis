@@ -19,8 +19,10 @@ object CaclMain {
     LoggerLevels.setStreamingLogLevels()
 
     //设置从kafka中获取数据
-    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181,101.251.98.138:2181,101.251.98.139:2181,101.251.98.140:2181,101.251.98.141:2181","online_test","test","5")
-    val sparkConf = new SparkConf().setAppName("ip_totalcount").setMaster("local[2]")
+//    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181,101.251.98.138:2181,101.251.98.139:2181,101.251.98.140:2181,101.251.98.141:2181","online_test","test","5")
+    //线上进行kafka获取数据的地址  线上测试
+    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.70:2181,101.251.98.71:2181,101.251.98.72:2181,101.251.98.73:2181,101.251.98.74:2181,101.251.98.75:2181,101.251.98.76:2181","online_test","kafka_es","7")
+    val sparkConf = new SparkConf().setAppName("ip_totalcount")//.setMaster("local[2]")
 
     //设置存入es地址
     sparkConf.set("es.index.auto.create", "true")

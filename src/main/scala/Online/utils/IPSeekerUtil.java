@@ -602,17 +602,19 @@ public class IPSeekerUtil {
             file = file.substring(file.indexOf("/"));
             try {
                 ipSeeker = new IPSeekerUtil(new File(file));
+                String[] arr2Provine = chinaToEnglish(PROVINCE_EN,ipSeeker.getCountry(ip));
+                String[] arr2IspEn = chinaToEnglish(ISP_EN,ipSeeker.getArea(ip));
+                arrResult = ArrayUtils.addAll(arr2Provine,arr2IspEn);
+
             } catch (Exception e) {
 
+                arrResult = new String[]{"未知", "UNKNOW", "未知", "UNKNOW"};
                 System.out.print("IP地址库实例化出错");
             }
         }
 //        System.out.print(ipSeeker.getCountry(ip));
 //        System.out.print(ipSeeker.getArea(ip));
 
-        String[] arr2Provine = chinaToEnglish(PROVINCE_EN,ipSeeker.getCountry(ip));
-        String[] arr2IspEn = chinaToEnglish(ISP_EN,ipSeeker.getArea(ip));
-        arrResult = ArrayUtils.addAll(arr2Provine,arr2IspEn);
         IP_WLK_ADDRESS.put(ip,arrResult);
         return arrResult;
         //====这里的查询应该用LruCache做一个缓存
