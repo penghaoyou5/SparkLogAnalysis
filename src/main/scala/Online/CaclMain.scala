@@ -1,6 +1,6 @@
 package Online
 
-import Online.utils.{CommenParseLog, LoggerLevels}
+import Online.utils.{CommenParseLog, KafkaSink, LoggerLevels, MySparkKafkaProducer}
 import org.apache.spark.SparkConf
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
@@ -8,6 +8,16 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.elasticsearch.spark._
 import org.elasticsearch.spark.rdd.EsSpark
+import org.apache.kafka.clients.producer.{ProducerConfig, RecordMetadata}
+import org.apache.spark.broadcast.Broadcast
+import java.util.{Calendar, Date, Locale, Properties}
+
+import org.apache.kafka.common.serialization.StringSerializer
+import org.apache.kafka.common.serialization.ByteArraySerializer
+import java.util.concurrent.Future
+
+import kafka.serializer.StringDecoder
+import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag
 
@@ -19,14 +29,14 @@ object CaclMain {
     LoggerLevels.setStreamingLogLevels()
 
     //设置从kafka中获取数据
-//    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181,101.251.98.138:2181,101.251.98.139:2181,101.251.98.140:2181,101.251.98.141:2181","online_test","test","5")
+//    val Array(zkQuorum, group, topics, numThreads) = Array("kafka-zkip1:2181,kafka-zkip2:2181,kafka-zkip3:2181,kafka-zkip4:2181,kafka-zkip5:2181","online_test","test","5")
     //线上进行kafka获取数据的地址  线上测试
-    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.70:2181,101.251.98.71:2181,101.251.98.72:2181,101.251.98.73:2181,101.251.98.74:2181,101.251.98.75:2181,101.251.98.76:2181","online_test","kafka_es","7")
-    val sparkConf = new SparkConf().setAppName("ip_totalcount")//.setMaster("local[2]")
+    val Array(zkQuorum, group, topics, numThreads) = Array("kafka-zkip1:2181,kafka-zkip2:2181,kafka-zkip3:2181,kafka-zkip4:2181,kafka-zkip5:2181,kafka-zkip6:2181","online_test","kafka_es","5")
+    val sparkConf = new SparkConf().setAppName("ip_totalcount_mapout")//.setMaster("local[2]")
 
     //设置存入es地址
     sparkConf.set("es.index.auto.create", "true")
-    sparkConf.set("es.nodes", "101.251.98.137,101.251.98.138,101.251.98.139,101.251.98.140,101.251.98.141")
+    sparkConf.set("es.nodes", "es-ip1,es-ip2,es-ip3,es-ip4,es-ip5")
     sparkConf.set("es.port", "9200")
 
     //启动sparkStreaming获取数据
@@ -35,16 +45,46 @@ object CaclMain {
     val originDataRdd = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap, StorageLevel.MEMORY_AND_DISK_SER)
 
 
+//    KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ss)
+//    val originDataRdd = originDataRddNoCache.cache()
+
+
+//    val kafkaProducer: Broadcast[MySparkKafkaProducer[Array[Byte], String]] = {
+//      val kafkaProducerConfig = {
+//        val p = new Properties()
+//        p.setProperty("bootstrap.servers", "kafka-zk1:9092,kafka-zk2:9092")
+//        p.setProperty("key.serializer", classOf[ByteArraySerializer].getName)
+//        p.setProperty("value.serializer", classOf[StringSerializer].getName)
+//        p
+//      }
+//      ssc.sparkContext.broadcast(MySparkKafkaProducer[Array[Byte], String](kafkaProducerConfig))
+//    }
+
+
+    // 广播KafkaSink
+    val kafkaProducer: Broadcast[KafkaSink[String, String]] = {
+      val kafkaProducerConfig = {
+        val p = new Properties()
+        p.setProperty("bootstrap.servers", "kafka-zk1:9092,kafka-zk2:9092,kafka-zk3:9092,kafka-zk4:9092,kafka-zk5:9092")
+        p.setProperty("key.serializer", classOf[StringSerializer].getName)
+        p.setProperty("value.serializer", classOf[StringSerializer].getName)
+        p
+      }
+//      log.warn("kafka producer init done!")
+      ssc.sparkContext.broadcast(KafkaSink[String, String](kafkaProducerConfig))
+    }
+
+
     val originMapRdd = originDataRdd.map(kafka_log_tup => {
       CommenParseLog.parseLogToTup(kafka_log_tup._2)
     }).filter(_.nonEmpty)
 
     //进行统计的几个方法
-    caclRequest(originMapRdd)
-    caclMimeType(originMapRdd)
-    caclBrowser(originMapRdd)
-    caclOs(originMapRdd)
-    caclAreaStat(originMapRdd)
+    caclRequest(originMapRdd,kafkaProducer,ssc)
+//    caclMimeType(originMapRdd)
+//    caclBrowser(originMapRdd)
+//    caclOs(originMapRdd)
+//    caclAreaStat(originMapRdd)
 
 
     ssc.start()
@@ -53,14 +93,26 @@ object CaclMain {
 
 
 
+
+
   /**
     * 请求数统计
     * @param originMapRdd
     */
-  def caclRequest( originMapRdd:DStream[(Map[String,String])]){
+  def caclRequest( originMapRdd:DStream[(Map[String,String])],kafkaProducer:Broadcast[KafkaSink[String, String]],ssc: StreamingContext){
 
     //请求数统计
-    val domainRequestRdd = originMapRdd.map( originMapItem => ((originMapItem.getOrElse("uriHost",""),originMapItem.getOrElse("userId",""),originMapItem.getOrElse("timestampStr","")),1)).reduceByKey(_+_)
+//    val domainRequestRdd = originMapRdd.map( originMapItem => ((originMapItem.getOrElse("uriHost",""),originMapItem.getOrElse("userId",""),originMapItem.getOrElse("timestampStr","")),1)).reduceByKey(_+_)
+
+    val domainRequestRdd = originMapRdd.map( originMapItem => {
+
+      print("qing qiu map originMapRdd.map" + originMapItem.getOrElse("timestampStr",""))
+      ((originMapItem.getOrElse("uriHost",""),originMapItem.getOrElse("userId",""),originMapItem.getOrElse("timestampStr","")),1)}).reduceByKey((i1,i2) => {
+
+      print("qing qiu map originMapRdd.reduce " + i2)
+      i1+i2})
+
+
     //域名请求数保存
     domainRequestRdd.map( domainRequestItem =>
 
@@ -69,16 +121,15 @@ object CaclMain {
       val totalIPCount = domainRequestItem._2
       val media_index= domainRequestItem._1._3.substring(0,8)
       val add_time = domainRequestItem._1._3
+      println( "shuchu  foreachRDD domainRequestItem    kanak ")
+      kafkaProducer.value.send("my-output-topic", add_time + "domainRequestRdd.map")
 
 
       Map(("uriHost",uriHost),("totalIPCount",totalIPCount),("media_index",media_index),("add_time",add_time))
     }
-    ).foreachRDD(rdd => {
-      if (rdd.count() > 0 ) {
-              rdd.saveToEs("spark-portal-{media_index}/logstashIndexDF_ip_totalcount")
-//        EsSpark.saveToEs(rdd, "spark-portal-{media_index}/logstashIndexDF_ip_totalcount")
-      }
-    } )
+    ).foreachRDD(rdd =>
+        saveRddToKafka(rdd,kafkaProducer,ssc)
+    )
 
 
     //用户请求数统计与保存
@@ -90,15 +141,8 @@ object CaclMain {
 
     userRequestRdd.map( item =>
       Map("userId" -> item._1._1,"add_time" -> item._1._2,"totalIPCountSum" -> item._2,"media_index" -> item._1._2.substring(0,8)))
-      .foreachRDD(
-        rdd =>
-          {
-
-            if (rdd.count() > 0 ){
-              EsSpark.saveToEs(rdd,"spark-portal-{media_index}/logstashIndexDF_ip_totalcount_sum")
-            }
-          }
-//        rdd.saveToEs("spark-portal-{media_index}/logstashIndexDF_ip_totalcount_sum")
+      .foreachRDD(rdd =>
+        saveRddToKafka(rdd,kafkaProducer,ssc)
       )
   }
 
@@ -200,4 +244,41 @@ object CaclMain {
     useBrowserRdd.map(item =>  Map(("userId",item._1._1),("countryCN",item._1._2),("areaCN",item._1._3),("mimeIPCountSum",item._2),("media_index",item._1._4.substring(0,8)),("add_time",item._1._4))).foreachRDD(_.saveToEs("spark-portal-area-{media_index}/logstashIndexDF_area_count_sum"))
 
   }
+
+
+
+  def saveRddToKafka(rdd:RDD[Map[String,Any]],kafkaProducer_old:Broadcast[KafkaSink[String, String]],ssc: StreamingContext): Unit ={
+    println( "shuchu  foreachRDD saveRddToKafka ")
+
+    if (!rdd.isEmpty) {
+
+//      // 广播KafkaSink
+//      val kafkaProducer: Broadcast[KafkaSink[String, String]] = {
+//        val kafkaProducerConfig = {
+//          val p = new Properties()
+//          p.setProperty("bootstrap.servers", "kafka-zk1:9092,kafka-zk2:9092")
+//          p.setProperty("key.serializer", classOf[StringSerializer].getName)
+//          p.setProperty("value.serializer", classOf[StringSerializer].getName)
+//          p
+//        }
+//        //      log.warn("kafka producer init done!")
+//        ssc.sparkContext.broadcast(KafkaSink[String, String](kafkaProducerConfig))
+//      }
+
+
+      kafkaProducer_old.value.send("my-output-topic", "shuchu rddin ")
+      println( "shuchu rddin ")
+
+      val strRdd = rdd.map(item => {
+//        item.toString()
+        item.toBuffer.toString()
+      })
+      strRdd.foreach(record => {
+        kafkaProducer_old.value.send("my-output-topic", record)
+        println(record)
+        // do something else
+      })
+    }
+  }
+
 }

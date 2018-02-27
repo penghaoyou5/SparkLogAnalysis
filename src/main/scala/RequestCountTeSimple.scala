@@ -16,11 +16,11 @@ object RequestCountTeSimple {
 
 
 
-    val Array(zkQuorum, group, topics, numThreads) = Array("101.251.98.137:2181","g1","test","2")
+    val Array(zkQuorum, group, topics, numThreads) = Array("kafka-ip1:2181","g1","test","2")
     val sparkConf = new SparkConf().setAppName("KafkaWordCount")//.setMaster("local[2]")
     sparkConf.set("es.index.auto.create", "true")
-//    sparkConf.set("es.nodes", "101.251.98.144")
-    sparkConf.set("es.nodes", "101.251.98.139")
+//    sparkConf.set("es.nodes", "es-ip")
+    sparkConf.set("es.nodes", "es-ip")
     sparkConf.set("es.port", "9200")
 
     val ssc = new StreamingContext(sparkConf, Seconds(5))

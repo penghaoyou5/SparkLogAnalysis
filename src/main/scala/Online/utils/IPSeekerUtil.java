@@ -597,10 +597,12 @@ public class IPSeekerUtil {
             return arrResult;
         }
         if(ipSeeker == null){
-            //这个地址一定要写对
+            //这个地址一定要写对 本地文件地址
 //            String file =  (IPSeekerUtil.class.getResource("/").toString() + "qqwry.dat");
-            String file = "qqwry.dat";
 //            file = file.substring(file.indexOf("/"));
+
+            //线上文件地址
+            String file = "qqwry.dat";
             //上一种方式集群运行失败所以改方式
 //            String file = "./src/main/scala/qqwry.dat";
             try {

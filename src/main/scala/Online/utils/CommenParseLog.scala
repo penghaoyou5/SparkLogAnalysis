@@ -16,6 +16,9 @@ object CommenParseLog {
   def main(args: Array[String]): Unit = {
     var kafka_log = "{\"source\":\"/data/cache1/filbeat_conf/logsdir/CHN-JI-3-3gD.dhdown.5211game.com-03.log\",\"type\":\"log\",\"@version\":\"1\",\"@timestamp\":\"2018-01-12T07:38:12.228Z\",\"offset\":81317701,\"prospector\":{\"type\":\"log\"},\"host\":\"BGP-SM-4-3gf\",\"message\":\"1512270367.090  92542 116.29.4.214 TCP_HIT/200 153420062 GET http://dhdown.5211game.com/download/360/dl/zjhl_setup360wan_all_1.0.3.19_ef.exe  - NONE/- application/octet-stream \\\"http://dhol.wan.360.cn/sindex.html\\\" \\\"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; WOW64; Trident/7.0; .NET4.0E; .NET4.0C; .NET CLR 3.5.30729; .NET CLR 2.0.50727; .NET CLR 3.0.30729)\\\" \\\"-\\\"\",\"tags\":[\"beats_input_codec_plain_applied\"],\"beat\":{\"name\":\"BGP-SM-4-3gf\",\"version\":\"6.1.1\",\"hostname\":\"BGP-SM-4-3gf\"}}"
 
+
+    kafka_log = "{\"message\":\"1516958496.484      3 27.23.229.19 TCP_IMS_HIT/304 218 GET http://cdn.kkapp.com/project/kkmessage/json/c_17_1501208259706.json  - NONE/- application/json \\\"-\\\" \\\"Dalvik/1.6.0 (Linux; U; Android 4.4.4; Konka Android TV 638 Build/KTU84P)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-26T09:21:39.758Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CHN-JC-c-3gI\",\"offset\":\"11317732\"}"
+
 //    kafka_log = "{\"message\":\"1516597252.198      8 117.136.56.139 TCP_IMS_HIT/304 218 GET http://cdn.kkapp.com/project/kkmessage/json/c_28_1510539734079.json  - NONE/- application/json \\\"-\\\" \\\"Dalvik/1.6.0 (Linux; U; Android 4.4.4; Konka Android TV 638 Build/KTU84P)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T05:00:56.403Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CMN-HB-1-3gH\",\"offset\":\"468182\"}"
 
 //    kafka_log = "{\"message\":\"1516603541.055     23 211.138.88.78 TCP_HIT/200 11255 GET http://m.88yangsheng.com/css/boilerplate.css  - NONE/- text/css \\\"http://m.88yangsheng.com/xieemanhua/\\\" \\\"Mozilla/5.0 (iPhone; CPU iPhone OS 11_2_2 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) BaiduBoxApp/10.2.5 iPhone; CPU iPhone OS 11_2_2 like Mac OS X Mobile/15C202 Safari/602.1 baiduboxapp/10.2.5.11 (Baidu; P2 11.2.2)\\\" \\\"-\\\"\",\"@version\":\"1\",\"@timestamp\":\"2018-01-22T06:45:42.855Z\",\"type\":\"fc_access\",\"file\":\"/data/proclog/log/squid/access.log\",\"host\":\"CNC-LQ-c-3HA\",\"offset\":\"25149271\"}"
@@ -112,6 +115,7 @@ object CommenParseLog {
 
     val (countryCN,countryPY,areaCN,areaPY) = (wlkAddress(0),wlkAddress(1),wlkAddress(2),wlkAddress(3))
 
+    println("jie xi yuan shi ri zhi " + timestampStr)
     //    (timestampStr,clientIp,repSize,uriHost,mime)
     Map(("uriHost",uriHost),("timestampStr",timestampStr),("clientIp",clientIp),("repSize",repSize),("mime",mime),("os_name",browserOsTup._2),("browser_name",browserOsTup._1),("userId",userId),("countryCN",countryCN),("areaCN",areaCN)) //,("countryPY",countryPY),("areaPY",areaPY)
   }

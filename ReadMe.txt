@@ -1,3 +1,6 @@
+博客地址：http://blog.csdn.net/u014171282/article/details/79389333
+
+
 集群线上运行成功代码
 filbeat6.1.1  ->  logstash6.1.1 -> kafka_2.11-1.0.0 -> spark-1.6.1-bin-hadoop2.6 - elasticdearch-5.5.2
 

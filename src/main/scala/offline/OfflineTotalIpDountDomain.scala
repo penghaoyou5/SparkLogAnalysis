@@ -16,13 +16,13 @@ object OfflineTotalIpDountDomain {
     //    val HdInputFilePath = args(0)
 //    val HdOutputFilePath = args(1)
 
-//    val HdInputFilePath = "hdfs://101.251.98.137:9000/weblukerOriginLog/20171204"
-    val HdInputFilePath = "hdfs://101.251.98.137:9000/weblukerOriginLog/"+ caclDate
+//    val HdInputFilePath = "hdfs://hdfs-master-ip:9000/weblukerOriginLog/20171204"
+    val HdInputFilePath = "hdfs://hdfs-master-ip:9000/weblukerOriginLog/"+ caclDate
 //    val HdOutputFilePath = args(1)
 
     val conf = new SparkConf().setAppName(AppName)//.setMaster("local")
     conf.set("es.index.auto.create", "true")
-    conf.set("es.nodes", "101.251.98.137,101.251.98.138,101.251.98.139,101.251.98.140,101.251.98.141")
+    conf.set("es.nodes", "es-ip1,es-ip2,es-ip3,es-ip4,es-ip5")
     conf.set("es.port", "9200")
     val sc = new SparkContext(conf)
 
