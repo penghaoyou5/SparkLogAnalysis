@@ -37,6 +37,9 @@ $SPARK_HOME/bin/spark-submit --class offline.OfflineTotalIpDountUserMySQl  --mas
 //=================
 实时统计完成 主类是 Online.CaclMain
 现在实现的实时统计共包括
+最终线上使用
+nohup $SPARK_HOME/bin/spark-submit --class Online.CaclMain  --master spark://sp26:7077 --executor-memory 40G --total-executor-cores 10 --files /home/ubuntu/sparkJar/qqwry.dat /home/ubuntu/sparkJar2/LogBIgData-1.0-SNAPSHOT.jar &
+
 
 总请求数统计
 文件类型统计   PV访问统计
